@@ -10,6 +10,26 @@ import time
 
 st.set_page_config(layout="wide")
 
+def generate_runtime_plot(results):
+    alg_names = []
+    runtimes = []
+
+    for idx in sorted(results.keys()):
+        _, _, _, _, elapsed_time, error = results[idx]
+        alg = st.session_state.get(f"alg_{idx}", f"Algorytm {idx+1}")
+        if elapsed_time is not None and not error:
+            alg_names.append(alg)
+            runtimes.append(elapsed_time)
+
+    if not alg_names:
+        return None
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.barh(alg_names, runtimes, color='skyblue')
+    ax.set_xlabel("Czas obliczeń (s)")
+    ax.set_title("Porównanie czasów obliczeń algorytmów")
+    return fig
+
 # --- Algorytmy ---
 def johnson_algorithm(jobs):
     if not jobs or any(len(job) != 2 for job in jobs):
@@ -221,3 +241,12 @@ for idx, col in enumerate(cols):
                 fig, ax = plt.subplots(figsize=(10, 3))
                 plot_gantt(order, jobs, start, ax)
                 st.pyplot(fig)
+
+
+# --- Wykres czasów obliczeń ---
+st.header("Porównanie czasów obliczeń algorytmów")
+fig_runtime = generate_runtime_plot(st.session_state.results)
+if fig_runtime:
+    st.pyplot(fig_runtime)
+else:
+    st.info("Brak danych do wyświetlenia wykresu czasów obliczeń.")
